@@ -31,6 +31,7 @@
         <tattr name="cfg.DevIdEnable" type="expr" content="struct" scope="task" min="0" max="1">1</tattr>
         <tattr name="cfg.HumEnable" type="expr" content="struct" scope="task" min="0" max="1">1</tattr>
         <tattr name="cfg.ManIdEnable" type="expr" content="struct" scope="task" min="0" max="1">1</tattr>
+        <tattr name="cfg.MeasureBothEnable" type="expr" content="struct" scope="task" min="0" max="1">1</tattr>
         <tattr name="cfg.SerIdEnable" desc="Enable Serial ID" type="expr" content="struct" scope="task" min="0" max="1">1</tattr>
         <tattr name="cfg.TmpEnable" type="expr" content="struct" scope="task" min="0" max="1">1</tattr>
         <tattr name="input.CfgData" type="expr_hex" content="struct" scope="task" min="0" max="65535">0x1000</tattr>
@@ -159,9 +160,7 @@
         <sccode name="event1" init_power_mode="0"><![CDATA[]]></sccode>
         <sccode name="event2" init_power_mode="0"><![CDATA[]]></sccode>
         <sccode name="event3" init_power_mode="0"><![CDATA[]]></sccode>
-        <sccode name="execute" init_power_mode="0"><![CDATA[U16 MeasureBothEnable = 1;
-
-//=============================================================================================
+        <sccode name="execute" init_power_mode="0"><![CDATA[//=============================================================================================
 //macro CheckError() {
 //    fwDelayUs(15000,FW_DELAY_RANGE_100_MS);  // Wait 5ms
 //    if(state.i2cStatus==1) {
@@ -171,12 +170,12 @@
 //=============================================================================================
 macro HDC1080_WriteConfigReg(data) {
     i2cDeviceWriteReg16MsbFirst(ALS_I2C_ADDR, Config_ADR, data);
-//    CheckError();
+    //    CheckError();
 }
 //=============================================================================================
 macro HDC1080_ReadReg(result, RegAddr) {
     i2cDeviceReadReg16MsbFirst(ALS_I2C_ADDR, RegAddr; result);
-//    CheckError();
+    //    CheckError();
 }
 //=============================================================================================
 macro HDC1080_Measure(result,RegAddr) {
@@ -233,6 +232,8 @@ macro HDC1080_MeasureBoth() {
 }
 //=============================================================================================
 U16 result=0;
+
+//cfg.Test=MeasureBothEnable;
 //-----
 if(cfg.CfgWriteEnable != 0) {
     HDC1080_WriteConfigReg(input.CfgData);
@@ -249,9 +250,9 @@ if(cfg.CfgReadEnable != 0) {
         cfg.CfgReadEnable = 0;
         //---
         if(result & MODE_MASK) {
-          MeasureBothEnable = 1;
+            cfg.MeasureBothEnable = 1;
         } else {
-          MeasureBothEnable = 0;
+            cfg.MeasureBothEnable = 0;
         }
         //---
     }
@@ -303,20 +304,20 @@ if(cfg.SerIdEnable != 0) {
     //-----
 }
 //----------------------------------------
-if(MeasureBothEnable ==1) {
-      HDC1080_MeasureBoth();
+if(cfg.MeasureBothEnable ==1) {
+    HDC1080_MeasureBoth();
 } else {
-      //-----
-      if(cfg.TmpEnable != 0) {
+    //-----
+    if(cfg.TmpEnable != 0) {
         HDC1080_Measure(result, TMP_ADR);
         output.tmp = result;
-      }
-      //-----
-      if(cfg.HumEnable != 0) {
+    }
+    //-----
+    if(cfg.HumEnable != 0) {
         HDC1080_Measure(result,HUM_ADR);
         output.hum = result;
-      }
-      //-----
+    }
+    //-----
 }
 //==============================================================================================
 // Schedule the next execution
