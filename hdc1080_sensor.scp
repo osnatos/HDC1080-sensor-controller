@@ -21,6 +21,7 @@
         <tattr name="DEV_ID_ADR" desc="Device ID" type="expr_hex" content="const" scope="task" min="0" max="65535">0xFF</tattr>
         <tattr name="HUM_ADR" type="expr_hex" content="const" scope="task" min="0" max="65535">0x01</tattr>
         <tattr name="MAN_ID_ADR" desc="Manufacturer ID" type="expr_hex" content="const" scope="task" min="0" max="65535">0xFE</tattr>
+        <tattr name="MODE_MASK" desc="Mode of acquisition bit" type="expr_hex" content="const" scope="task" min="0" max="65535">0x1000</tattr>
         <tattr name="SerIdFirst_ADR" desc="First 2 bytes of the serial ID reg. address" type="expr_hex" content="const" scope="task" min="0" max="65535">0xFB</tattr>
         <tattr name="SerIdLast_ADR" desc="Last byte of the serial ID reg. address" type="expr_hex" content="const" scope="task" min="0" max="65535">0xFD</tattr>
         <tattr name="SerIdMid_ADR" desc="Mid 2 bytes of the serial ID reg. address" type="expr_hex" content="const" scope="task" min="0" max="65535">0xFC</tattr>
@@ -158,22 +159,24 @@
         <sccode name="event1" init_power_mode="0"><![CDATA[]]></sccode>
         <sccode name="event2" init_power_mode="0"><![CDATA[]]></sccode>
         <sccode name="event3" init_power_mode="0"><![CDATA[]]></sccode>
-        <sccode name="execute" init_power_mode="0"><![CDATA[//=============================================================================================
-macro CheckError() {
-    fwDelayUs(15000,FW_DELAY_RANGE_100_MS);  // Wait 5ms
-    if(state.i2cStatus==1) {
-        output.ErrFlag=1;
-    }
-}
+        <sccode name="execute" init_power_mode="0"><![CDATA[U16 MeasureBothEnable = 1;
+
+//=============================================================================================
+//macro CheckError() {
+//    fwDelayUs(15000,FW_DELAY_RANGE_100_MS);  // Wait 5ms
+//    if(state.i2cStatus==1) {
+//        output.ErrFlag=1;
+//    }
+//}
 //=============================================================================================
 macro HDC1080_WriteConfigReg(data) {
     i2cDeviceWriteReg16MsbFirst(ALS_I2C_ADDR, Config_ADR, data);
-    CheckError();
+//    CheckError();
 }
 //=============================================================================================
 macro HDC1080_ReadReg(result, RegAddr) {
     i2cDeviceReadReg16MsbFirst(ALS_I2C_ADDR, RegAddr; result);
-    CheckError();
+//    CheckError();
 }
 //=============================================================================================
 macro HDC1080_Measure(result,RegAddr) {
@@ -235,6 +238,7 @@ if(cfg.CfgWriteEnable != 0) {
     HDC1080_WriteConfigReg(input.CfgData);
     if(state.i2cStatus==0) {
         cfg.CfgWriteEnable = 0;
+        cfg.CfgReadEnable = 1;
     }
 }
 //-----
@@ -243,6 +247,13 @@ if(cfg.CfgReadEnable != 0) {
     if(state.i2cStatus==0) {
         output.ConfigValue = result;
         cfg.CfgReadEnable = 0;
+        //---
+        if(result & MODE_MASK) {
+          MeasureBothEnable = 1;
+        } else {
+          MeasureBothEnable = 0;
+        }
+        //---
     }
 }
 //-----
@@ -292,18 +303,21 @@ if(cfg.SerIdEnable != 0) {
     //-----
 }
 //----------------------------------------
- HDC1080_MeasureBoth();
-
-
-//if(cfg.TmpEnable != 0) {
-//    HDC1080_Measure(result, TMP_ADR);
-//    output.tmp = result;
-//}
-//-----
-//if(cfg.HumEnable != 0) {
-//    HDC1080_Measure(result,HUM_ADR);
-//    output.hum = result;
-//}
+if(MeasureBothEnable ==1) {
+      HDC1080_MeasureBoth();
+} else {
+      //-----
+      if(cfg.TmpEnable != 0) {
+        HDC1080_Measure(result, TMP_ADR);
+        output.tmp = result;
+      }
+      //-----
+      if(cfg.HumEnable != 0) {
+        HDC1080_Measure(result,HUM_ADR);
+        output.hum = result;
+      }
+      //-----
+}
 //==============================================================================================
 // Schedule the next execution
 fwScheduleTask(1);
