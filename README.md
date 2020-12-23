@@ -9,6 +9,7 @@ The sensor controller is designed to work with the HDC1080 sensor,using the Sens
 In order to generate all project files, you must:
 * Launch “Sensor Controller Studio” (SCS) using the  hdc1080_sensor.scp project file.
 * In the SCS program, click on the “Code Generator” button. SCS will create a scif_files folder (if it did not exist before) and generate all the necessary files in it (except for the readme file).
+* The file “scif_hdc1080_how_to_use.html” contains information on using the controller.
 # Software tools:
 * Sensor Controller Studio v2.7.0.155
 # Debugging:
