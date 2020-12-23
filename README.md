@@ -19,6 +19,6 @@ In order to generate all project files, you must:
 * HDC1080 / pin2 - GND
 * HDC1080 / pin5 - 3.3V
 * HDC1080 / pin6 - SCL / DIO4 + PULUP 10K
-# Using:
+# Used in the project:
 * The controller was used in the [Beacon_CC2640_with_SensorController_HDC1080](https://github.com/osnatos/Beacon_CC2640_with_SensorController_HDC1080).
 
