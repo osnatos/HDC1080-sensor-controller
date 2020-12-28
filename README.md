@@ -1,5 +1,5 @@
 # HDC1080-sensor-controller
-The sensor controller is designed to work with the HDC1080 sensor,using the Sensor Controller Engine of CC2640R2F MCU. 
+The sensor controller is designed to work with the [HDC1080 sensor](https://www.ti.com/lit/ds/symlink/hdc1080.pdf?ts=1609168968558&ref_url=https%253A%252F%252Fwww.google.com%252F), using the Sensor Controller Engine of CC2640R2F MCU. 
 * Project name: HDC1080 sensor 
 * Project file: hdc1080_sensor.scp 
 * Operating system: TI-RTOS 
